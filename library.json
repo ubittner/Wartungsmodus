@@ -1,0 +1,12 @@
+{
+    "id": "{A2FDCE6D-C181-9B29-638D-FEB803E5DEA0}",
+    "name": "Wartungsmodus",
+    "author": "Ulrich Bittner",
+    "url": "https://github.com/ubittner/Wartungsmodus",
+    "compatibility": {
+        "version": "6.1"
+    },
+    "version": "1.0",
+    "build": 1,
+    "date": 1666976513
+}

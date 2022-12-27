@@ -1,0 +1,14 @@
+{
+    "id": "{EA65A9F4-68CA-7891-E4B7-34E24B7A4745}",
+    "name": "Wartungsmodus",
+    "type": 3,
+    "vendor": "UB",
+    "aliases": [
+        "Wartungsmodus"
+    ],
+    "url": "https://github.com/ubittner/Wartungsmodus/tree/main/Wartungsmodus",
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "WM"
+}
