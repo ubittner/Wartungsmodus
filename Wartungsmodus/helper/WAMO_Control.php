@@ -2,7 +2,7 @@
 
 /**
  * @project       Wartungsmodus/Wartungsmodus
- * @file          WM_Control.php
+ * @file          WAMO_Control.php
  * @author        Ulrich Bittner
  * @copyright     2022 Ulrich Bittner
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
@@ -13,7 +13,7 @@
 
 declare(strict_types=1);
 
-trait WM_Control
+trait WAMO_Control
 {
     /**
      * Determines the trigger variables automatically.

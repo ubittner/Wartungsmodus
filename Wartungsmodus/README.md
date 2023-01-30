@@ -50,14 +50,14 @@ Dieses Modul schaltet einen Wartungsmodus in [IP-Symcon](https://www.symcon.de).
 Das Modul Wartungsmodus kann über eine externe Aktion geschaltet werden.  
 Nachfolgendes Beispiel schaltet den Wartungsmodus an.
 
-> WM_ToggleMaintenanceMode(12345, true);
+> WAMO_ToggleMaintenanceMode(12345, true);
 
 ### 5. PHP-Befehlsreferenz
 
 #### 5.1 Wartungsmodus schalten
 
 ```
-boolean WM_ToggleMaintenanceMode(integer INSTANCE_ID, boolean STATE);
+boolean WAMO_ToggleMaintenanceMode(integer INSTANCE_ID, boolean STATE);
 ```
 
 Konnte der Befehl erfolgreich ausgeführt werden, liefert er als Ergebnis **TRUE**, andernfalls **FALSE**.
@@ -69,4 +69,4 @@ Konnte der Befehl erfolgreich ausgeführt werden, liefert er als Ergebnis **TRUE
 |               | true  | An             |
 
 Beispiel:
-> WM_ToggleMaintenanceMode(12345, false);
+> WAMO_ToggleMaintenanceMode(12345, false);

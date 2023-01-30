@@ -13,18 +13,18 @@
 
 declare(strict_types=1);
 
-include_once __DIR__ . '/helper/WM_autoload.php';
+include_once __DIR__ . '/helper/WAMO_autoload.php';
 
 class Wartungsmodus extends IPSModule
 {
     //Helper
-    use WM_Config;
-    use WM_Control;
+    use WAMO_Config;
+    use WAMO_Control;
 
     //Constants
     private const MODULE_NAME = 'Wartungsmodus';
-    private const MODULE_PREFIX = 'WM';
-    private const MODULE_VERSION = '1.0-1, 28.10.2022';
+    private const MODULE_PREFIX = 'WAMO';
+    private const MODULE_VERSION = '1.0-2, 30.01.2023';
 
     public function Create()
     {

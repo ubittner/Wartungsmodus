@@ -2,7 +2,7 @@
 
 /**
  * @project       Wartungsmodus/Wartungsmodus
- * @file          WM_Config.php
+ * @file          WAMO_Config.php
  * @author        Ulrich Bittner
  * @copyright     2022 Ulrich Bittner
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
@@ -12,7 +12,7 @@
 
 declare(strict_types=1);
 
-trait WM_Config
+trait WAMO_Config
 {
     /**
      * Gets the configuration form.
@@ -86,10 +86,12 @@ trait WM_Config
             if ($id > 1 && @IPS_ObjectExists($id)) { //0 = main category, 1 = none
                 $stateName = 'aktiv';
                 $rowColor = '#C0FFC0'; //light green
-                if (!GetValue($id)) {
+                $value = GetValueBoolean($id);
+                if (!$value) {
                     $stateName = 'inaktiv';
                     $rowColor = '#FFC0C0'; //red
                 }
+                $this->SendDebug(__FUNCTION__, 'ID: ' . $id . ', Value: ' . json_encode($value) . ', Status: ' . $stateName, 0);
             }
             if (!$variable['Use']) {
                 $stateName = 'deaktiviert';
