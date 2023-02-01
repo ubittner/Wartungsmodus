@@ -105,11 +105,144 @@ trait WAMO_Control
                 continue;
             }
             //false = maintenance mode is off, so variable must be switched on and vice versa
+            $this->SendDebug(__FUNCTION__, 'ID: ' . $variable['ID'] . ', State: ' . json_encode(!$State), 0);
             $toggle = @RequestAction($variable['ID'], !$State);
             if (!$toggle) {
                 $result = false;
             }
         }
+        $this->UpdateStatus();
         return $result;
+    }
+
+    /**
+     * Updates the status.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function UpdateStatus(): void
+    {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt', 0);
+        if (!$this->CheckForExistingVariables()) {
+            return;
+        }
+
+        $variables = json_decode($this->GetMonitoredVariables(), true);
+
+        $this->SetValue('LastUpdate', date('d.m.Y H:i:s'));
+
+        ##### Update overview list for WebFront
+
+        $string = '';
+        if ($this->ReadPropertyBoolean('EnableMaintenanceList')) {
+            $string .= "<table style='width: 100%; border-collapse: collapse;'>";
+            $string .= '<tr><td><b>Status</b></td><td><b>Name</b></td><td><b>ID</b></td></tr>';
+            //Sort variables by name
+            array_multisort(array_column($variables, 'Name'), SORT_ASC, $variables);
+            //Rebase array
+            $variables = array_values($variables);
+            $separator = false;
+            if (!empty($variables)) {
+                //Show inactive first
+                if ($this->ReadPropertyBoolean('EnableInactive')) {
+                    foreach ($variables as $variable) {
+                        $id = $variable['ID'];
+                        if ($id != 0 && IPS_ObjectExists($id)) {
+                            if ($variable['ActualStatus'] == 0) {
+                                $separator = true;
+                                $string .= '<tr><td>' . $variable['StatusText'] . '</td><td>' . $variable['Name'] . '</td><td>' . $id . '</td></tr>';
+                            }
+                        }
+                    }
+                }
+                //Active are next
+                if ($this->ReadPropertyBoolean('EnableActive')) {
+                    //Check if we have an active element for a spacer
+                    $activeElement = false;
+                    foreach ($variables as $variable) {
+                        $id = $variable['ID'];
+                        if ($id != 0 && IPS_ObjectExists($id)) {
+                            if ($variable['ActualStatus'] == 1) {
+                                $activeElement = true;
+                            }
+                        }
+                    }
+                    if ($separator && $activeElement) {
+                        $string .= '<tr><td><b>&#8205;</b></td><td><b>&#8205;</b></td><td><b>&#8205;</b></td></tr>';
+                    }
+                    //Active elements
+                    foreach ($variables as $variable) {
+                        $id = $variable['ID'];
+                        if ($id != 0 && IPS_ObjectExists($id)) {
+                            if ($variable['ActualStatus'] == 1) {
+                                $string .= '<tr><td>' . $variable['StatusText'] . '</td><td>' . $variable['Name'] . '</td><td>' . $id . '</td></tr>';
+                            }
+                        }
+                    }
+                }
+            }
+            $string .= '</table>';
+        }
+        $this->SetValue('MaintenanceList', $string);
+    }
+
+    #################### Private
+
+    /**
+     * Checks for monitored variables.
+     *
+     * @return bool
+     * false =  There are no monitored variables
+     * true =   There are monitored variables
+     * @throws Exception
+     */
+    private function CheckForExistingVariables(): bool
+    {
+        $this->SendDebug(__FUNCTION__, 'wird ausgeführt', 0);
+        $existing = false;
+        $monitoredVariables = json_decode($this->ReadPropertyString('VariableList'), true);
+        foreach ($monitoredVariables as $variable) {
+            if (!$variable['Use']) {
+                continue;
+            }
+            $existing = true;
+        }
+        if (!$existing) {
+            $this->SendDebug(__FUNCTION__, 'Abbruch, Es werden keine Variablen überwacht!', 0);
+        }
+        return $existing;
+    }
+
+    /**
+     * Gets the monitored variables and their status.
+     *
+     * @return string
+     * @throws Exception
+     */
+    private function GetMonitoredVariables(): string
+    {
+        $result = [];
+        $monitoredVariables = json_decode($this->ReadPropertyString('VariableList'), true);
+        foreach ($monitoredVariables as $variable) {
+            if (!$variable['Use']) {
+                continue;
+            }
+            $id = $variable['ID'];
+            if ($id > 1 && @IPS_ObjectExists($id)) {
+                $actualStatus = 0; //0 = inactive
+                $statusText = $this->ReadPropertyString('InactiveText');
+                if (GetValueBoolean($id)) {
+                    $actualStatus = 1; //1 = active
+                    $statusText = $this->ReadPropertyString('ActiveText');
+                }
+                $result[] = [
+                    'ID'           => $id,
+                    'Name'         => $variable['Designation'],
+                    'ActualStatus' => $actualStatus,
+                    'StatusText'   => $statusText];
+            }
+        }
+        return json_encode($result);
     }
 }
