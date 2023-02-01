@@ -135,7 +135,7 @@ class Wartungsmodus extends IPSModule
         IPS_SetHidden($this->GetIDForIdent('UpdateStatus'), !$this->ReadPropertyBoolean('EnableUpdateStatus'));
         IPS_SetHidden($this->GetIDForIdent('MaintenanceList'), !$this->ReadPropertyBoolean('EnableMaintenanceList'));
 
-        //$this->ToggleMaintenanceMode($this->GetValue('MaintenanceMode'));
+        $this->ToggleMaintenanceMode($this->GetValue('MaintenanceMode'));
 
         //Set automatic status update timer
         $milliseconds = 0;
