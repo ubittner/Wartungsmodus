@@ -24,7 +24,7 @@ class Wartungsmodus extends IPSModule
     //Constants
     private const MODULE_NAME = 'Wartungsmodus';
     private const MODULE_PREFIX = 'WAMO';
-    private const MODULE_VERSION = '1.0-2, 30.01.2023';
+    private const MODULE_VERSION = '1.0-3, 01.02.2023';
 
     public function Create()
     {
@@ -36,8 +36,18 @@ class Wartungsmodus extends IPSModule
         //Functions
         $this->RegisterPropertyString('Note', '');
         $this->RegisterPropertyBoolean('EnableMaintenanceMode', false);
+        $this->RegisterPropertyBoolean('EnableLastUpdate', true);
+        $this->RegisterPropertyBoolean('EnableUpdateStatus', true);
+        $this->RegisterPropertyBoolean('EnableMaintenanceList', true);
+        $this->RegisterPropertyBoolean('EnableInactive', true);
+        $this->RegisterPropertyString('InactiveText', '🔴 Inaktiv');
+        $this->RegisterPropertyBoolean('EnableActive', true);
+        $this->RegisterPropertyString('ActiveText', '🟢 Aktiv');
         //Trigger list
         $this->RegisterPropertyString('VariableList', '[]');
+        //Update
+        $this->RegisterPropertyBoolean('AutomaticStatusUpdate', false);
+        $this->RegisterPropertyInteger('StatusUpdateInterval', 60);
 
         ########## Variables
 
@@ -49,6 +59,34 @@ class Wartungsmodus extends IPSModule
             $this->SetValue('MaintenanceMode', false);
             IPS_SetIcon(@$this->GetIDForIdent('MaintenanceMode'), 'Gear');
         }
+
+        //Last update
+        $id = @$this->GetIDForIdent('LastUpdate');
+        $this->RegisterVariableString('LastUpdate', 'Letzte Aktualisierung', '', 20);
+        if (!$id) {
+            IPS_SetIcon($this->GetIDForIdent('LastUpdate'), 'Clock');
+        }
+
+        //Update status
+        $profile = self::MODULE_PREFIX . '.' . $this->InstanceID . '.UpdateStatus';
+        if (!IPS_VariableProfileExists($profile)) {
+            IPS_CreateVariableProfile($profile, 1);
+        }
+        IPS_SetVariableProfileAssociation($profile, 0, 'Aktualisieren', 'Repeat', -1);
+        $this->RegisterVariableInteger('UpdateStatus', 'Aktualisierung', $profile, 30);
+        $this->EnableAction('UpdateStatus');
+
+        //Maintenance list
+        $id = @$this->GetIDForIdent('MaintenanceList');
+        $this->RegisterVariableString('MaintenanceList', 'Wartungsliste', 'HTMLBox', 40);
+        if (!$id) {
+            IPS_SetIcon($this->GetIDForIdent('MaintenanceList'), 'Database');
+        }
+
+        ########## Timer
+
+        //Status update
+        $this->RegisterTimer('StatusUpdate', 0, self::MODULE_PREFIX . '_UpdateStatus(' . $this->InstanceID . ');');
     }
 
     public function ApplyChanges()
@@ -87,25 +125,62 @@ class Wartungsmodus extends IPSModule
             $id = $variable['ID'];
             if ($id > 1 && @IPS_ObjectExists($id)) { //0 = main category, 1 = none
                 $this->RegisterReference($id);
+                $this->RegisterMessage($id, VM_UPDATE);
             }
         }
 
         //WebFront options
         IPS_SetHidden($this->GetIDForIdent('MaintenanceMode'), !$this->ReadPropertyBoolean('EnableMaintenanceMode'));
+        IPS_SetHidden($this->GetIDForIdent('LastUpdate'), !$this->ReadPropertyBoolean('EnableLastUpdate'));
+        IPS_SetHidden($this->GetIDForIdent('UpdateStatus'), !$this->ReadPropertyBoolean('EnableUpdateStatus'));
+        IPS_SetHidden($this->GetIDForIdent('MaintenanceList'), !$this->ReadPropertyBoolean('EnableMaintenanceList'));
 
-        $this->ToggleMaintenanceMode($this->GetValue('MaintenanceMode'));
+        //$this->ToggleMaintenanceMode($this->GetValue('MaintenanceMode'));
+
+        //Set automatic status update timer
+        $milliseconds = 0;
+        if ($this->ReadPropertyBoolean('AutomaticStatusUpdate')) {
+            $milliseconds = $this->ReadPropertyInteger('StatusUpdateInterval') * 1000;
+        }
+        $this->SetTimerInterval('StatusUpdate', $milliseconds);
+
+        //Update status
+        $this->UpdateStatus();
     }
 
-    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    public function Destroy()
     {
-        $this->SendDebug(__FUNCTION__, $TimeStamp . ', SenderID: ' . $SenderID . ', Message: ' . $Message . ', Data: ' . print_r($Data, true), 0);
-        if (!empty($Data)) {
-            foreach ($Data as $key => $value) {
-                $this->SendDebug(__FUNCTION__, 'Data[' . $key . '] = ' . json_encode($value), 0);
+        //Never delete this line!
+        parent::Destroy();
+
+        //Delete profiles
+        $profiles = ['UpdateStatus'];
+        foreach ($profiles as $profile) {
+            $profileName = self::MODULE_PREFIX . '.' . $this->InstanceID . '.' . $profile;
+            if (@IPS_VariableProfileExists($profileName)) {
+                IPS_DeleteVariableProfile($profileName);
             }
         }
-        if ($Message == IPS_KERNELSTARTED) {
-            $this->KernelReady();
+    }
+
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data): void
+    {
+        $this->SendDebug(__FUNCTION__, $TimeStamp . ', SenderID: ' . $SenderID . ', Message: ' . $Message . ', Data: ' . print_r($Data, true), 0);
+        switch ($Message) {
+            case IPS_KERNELSTARTED:
+                $this->KernelReady();
+                break;
+
+            case VM_UPDATE:
+                //$Data[0] = actual value
+                //$Data[1] = value changed
+                //$Data[2] = last value
+                //$Data[3] = timestamp actual value
+                //$Data[4] = timestamp value changed
+                //$Data[5] = timestamp last value
+                $this->UpdateStatus();
+                break;
+
         }
     }
 
@@ -113,8 +188,15 @@ class Wartungsmodus extends IPSModule
 
     public function RequestAction($Ident, $Value)
     {
-        if ($Ident == 'MaintenanceMode') {
-            $this->ToggleMaintenanceMode($Value);
+        switch ($Ident) {
+            case 'MaintenanceMode':
+                $this->ToggleMaintenanceMode($Value);
+                break;
+
+            case 'UpdateStatus':
+                $this->UpdateStatus();
+                break;
+
         }
     }
 

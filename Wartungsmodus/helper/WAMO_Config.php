@@ -72,6 +72,44 @@ trait WAMO_Config
                     'type'    => 'CheckBox',
                     'name'    => 'EnableMaintenanceMode',
                     'caption' => 'Wartungsmodus (Schalter im WebFront)'
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'EnableLastUpdate',
+                    'caption' => 'Letzte Aktualisierung'
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'EnableUpdateStatus',
+                    'caption' => 'Aktualisierung'
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'EnableMaintenanceList',
+                    'caption' => 'Wartungsliste'
+                ], [
+                    'type'    => 'CheckBox',
+                    'name'    => 'EnableInactive',
+                    'caption' => 'Inaktiv anzeigen'
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'EnableActive',
+                    'caption' => 'Aktiv anzeigen'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => ' '
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'InactiveText',
+                    'caption' => 'Inaktiv'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'ActiveText',
+                    'caption' => 'Aktiv'
                 ]
             ]
         ];
@@ -97,7 +135,7 @@ trait WAMO_Config
                 $stateName = 'deaktiviert';
                 $rowColor = '#DFDFDF'; //grey
             }
-            $variableValues[] = ['ActualState' => $stateName, 'rowColor' => $rowColor];
+            $variableValues[] = ['ActualState' => $stateName, 'VariableID' => $id, 'rowColor' => $rowColor];
         }
 
         $form['elements'][] = [
@@ -121,14 +159,10 @@ trait WAMO_Config
                             ]
                         ],
                         [
-                            'caption' => 'Variable',
-                            'name'    => 'ID',
-                            'width'   => '400px',
-                            'add'     => 0,
-                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "VariableListConfigurationButton", "ID " . $VariableList["ID"] . " bearbeiten", $VariableList["ID"]);',
-                            'edit'    => [
-                                'type'     => 'SelectVariable'
-                            ]
+                            'name'    => 'ActualState',
+                            'caption' => 'Aktueller Status',
+                            'width'   => '150px',
+                            'add'     => ''
                         ],
                         [
                             'name'    => 'Designation',
@@ -141,11 +175,22 @@ trait WAMO_Config
                             ]
                         ],
                         [
-                            'name'    => 'ActualState',
-                            'caption' => 'Aktueller Status',
-                            'width'   => '150px',
-                            'add'     => ''
+                            'caption' => 'Variable',
+                            'name'    => 'ID',
+                            'width'   => '400px',
+                            'add'     => 0,
+                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "VariableListConfigurationButton", "ID " . $VariableList["ID"] . " bearbeiten", $VariableList["ID"]);',
+                            'edit'    => [
+                                'type'     => 'SelectVariable'
+                            ]
                         ],
+                        [
+                            'caption' => 'ID',
+                            'name'    => 'VariableID',
+                            'width'   => '100px',
+                            'add'     => '',
+                            'onClick' => self::MODULE_PREFIX . '_ModifyButton($id, "VariableListConfigurationButton", "ID " . $VariableList["ID"] . " bearbeiten", $VariableList["ID"]);',
+                        ]
                     ],
                     'values' => $variableValues
                 ],
@@ -155,6 +200,25 @@ trait WAMO_Config
                     'caption'  => 'Bearbeiten',
                     'visible'  => false,
                     'objectID' => 0
+                ]
+            ]
+        ];
+
+        //Automatic status update
+        $form['elements'][] = [
+            'type'    => 'ExpansionPanel',
+            'caption' => 'Aktualisierung',
+            'items'   => [
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'AutomaticStatusUpdate',
+                    'caption' => 'Automatische Aktualisierung'
+                ],
+                [
+                    'type'    => 'NumberSpinner',
+                    'name'    => 'StatusUpdateInterval',
+                    'caption' => 'Intervall',
+                    'suffix'  => 'Sekunden'
                 ]
             ]
         ];
