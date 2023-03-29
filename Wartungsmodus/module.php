@@ -40,9 +40,9 @@ class Wartungsmodus extends IPSModule
         $this->RegisterPropertyBoolean('EnableUpdateStatus', true);
         $this->RegisterPropertyBoolean('EnableMaintenanceList', true);
         $this->RegisterPropertyBoolean('EnableInactive', true);
-        $this->RegisterPropertyString('InactiveText', '🔴 Inaktiv');
+        $this->RegisterPropertyString('InactiveText', '🔴  Inaktiv');
         $this->RegisterPropertyBoolean('EnableActive', true);
-        $this->RegisterPropertyString('ActiveText', '🟢 Aktiv');
+        $this->RegisterPropertyString('ActiveText', '🟢  Aktiv');
         //Trigger list
         $this->RegisterPropertyString('VariableList', '[]');
         //Update
