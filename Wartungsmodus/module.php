@@ -22,9 +22,9 @@ class Wartungsmodus extends IPSModule
     use WAMO_Control;
 
     //Constants
-    private const MODULE_NAME = 'Wartungsmodus';
+    private const LIBRARY_GUID = '{A2FDCE6D-C181-9B29-638D-FEB803E5DEA0}';
+    private const MODULE_GUID = '{EA65A9F4-68CA-7891-E4B7-34E24B7A4745}';
     private const MODULE_PREFIX = 'WAMO';
-    private const MODULE_VERSION = '1.0-3, 01.02.2023';
 
     public function Create()
     {

@@ -26,8 +26,14 @@ trait WAMO_Control
     {
         $this->SendDebug(__FUNCTION__, 'wird ausgeführt', 0);
         $this->SendDebug(__FUNCTION__, 'Identifikator: ' . $ObjectIdents, 0);
+
+        $this->UpdateFormField('DetermineVariableProgress', 'minimum', 0);
+        $maximumVariables = count(IPS_GetVariableList());
+        $this->UpdateFormField('DetermineVariableProgress', 'maximum', $maximumVariables);
+
         //Determine variables first
         $determinedVariables = [];
+        $passedVariables = 0;
         foreach (@IPS_GetVariableList() as $variable) {
             if ($ObjectIdents == '') {
                 return;
@@ -51,6 +57,13 @@ trait WAMO_Control
                         'Designation' => $name];
                 }
             }
+
+            $passedVariables++;
+            $this->UpdateFormField('DetermineVariableProgress', 'visible', true);
+            $this->UpdateFormField('DetermineVariableProgress', 'current', $passedVariables);
+            $this->UpdateFormField('DetermineVariableProgressInfo', 'visible', true);
+            $this->UpdateFormField('DetermineVariableProgressInfo', 'caption', $passedVariables . '/' . $maximumVariables);
+            IPS_Sleep(25);
         }
 
         //Get already listed variables
@@ -74,13 +87,20 @@ trait WAMO_Control
                 }
             }
         }
+        if (empty($determinedVariables)) {
+            $this->UpdateFormField('DetermineVariableProgress', 'visible', false);
+            $this->UpdateFormField('DetermineVariableProgressInfo', 'visible', false);
+            $infoText = 'Es wurden keinen Variablen gefunden!';
+            $this->UpdateFormField('InfoMessage', 'visible', true);
+            $this->UpdateFormField('InfoMessageLabel', 'caption', $infoText);
+            return;
+        }
         //Sort variables by name
         array_multisort(array_column($listedVariables, 'Designation'), SORT_ASC, $listedVariables);
         @IPS_SetProperty($this->InstanceID, 'VariableList', json_encode(array_values($listedVariables)));
         if (@IPS_HasChanges($this->InstanceID)) {
             @IPS_ApplyChanges($this->InstanceID);
         }
-        echo 'Die Variablen wurden erfolgreich hinzugefügt!';
     }
 
     /**
