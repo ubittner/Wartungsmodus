@@ -1,14 +1,15 @@
 <?php
 
 /**
- * @project       Wartungsmodus/Wartungsmodus
+ * @project       Wartungsmodus/Wartungsmodus/
  * @file          module.php
  * @author        Ulrich Bittner
- * @copyright     2022 Ulrich Bittner
+ * @copyright     2023 Ulrich Bittner
  * @license       https://creativecommons.org/licenses/by-nc-sa/4.0/ CC BY-NC-SA 4.0
  */
 
 /** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection SpellCheckingInspection */
 /** @noinspection PhpUnused */
 
 declare(strict_types=1);
@@ -18,7 +19,7 @@ include_once __DIR__ . '/helper/WAMO_autoload.php';
 class Wartungsmodus extends IPSModule
 {
     //Helper
-    use WAMO_Config;
+    use WAMO_ConfigurationForm;
     use WAMO_Control;
 
     //Constants
@@ -40,14 +41,14 @@ class Wartungsmodus extends IPSModule
         $this->RegisterPropertyBoolean('EnableUpdateStatus', true);
         $this->RegisterPropertyBoolean('EnableMaintenanceList', true);
         $this->RegisterPropertyBoolean('EnableInactive', true);
-        $this->RegisterPropertyString('InactiveText', '🔴  Inaktiv');
+        $this->RegisterPropertyString('InactiveText', '🔴 Inaktiv');
         $this->RegisterPropertyBoolean('EnableActive', true);
-        $this->RegisterPropertyString('ActiveText', '🟢  Aktiv');
+        $this->RegisterPropertyString('ActiveText', '🟢 Aktiv');
         //Trigger list
         $this->RegisterPropertyString('VariableList', '[]');
         //Update
         $this->RegisterPropertyBoolean('AutomaticStatusUpdate', false);
-        $this->RegisterPropertyInteger('StatusUpdateInterval', 60);
+        $this->RegisterPropertyInteger('StatusUpdateInterval', 900);
 
         ########## Variables
 
